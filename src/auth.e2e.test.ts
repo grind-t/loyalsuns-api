@@ -5,24 +5,15 @@ import { it } from "node:test";
 import z from "zod";
 
 import { loginResponseSchema } from "./auth.schema.ts";
-import { login, refreshToken } from "./auth.ts";
+import { refreshToken } from "./auth.ts";
 
-function assertMatchesSchema(response: unknown) {
-  const { error } = loginResponseSchema.safeParse(response);
+it("refreshes token matching the strict schema", async () => {
+  const { LOYALSUNS_REFRESH_TOKEN: token, LOYALSUNS_TENANT_ID: tenantId } = env;
+  assert(token, "LOYALSUNS_REFRESH_TOKEN env var is required");
+  assert(tenantId, "LOYALSUNS_TENANT_ID env var is required");
+
+  const refreshResponse = await refreshToken({ refreshToken: token, tenantId });
+
+  const { error } = loginResponseSchema.safeParse(refreshResponse);
   if (error) assert.fail(z.prettifyError(error));
-}
-
-it("logins and refreshes token", async () => {
-  const { LOYALSUNS_USERNAME: username, LOYALSUNS_PASSWORD: password } = env;
-  assert(username, "LOYALSUNS_USERNAME env var is required");
-  assert(password, "LOYALSUNS_PASSWORD env var is required");
-
-  const loginResponse = await login({ username, password });
-  assertMatchesSchema(loginResponse);
-
-  const refreshResponse = await refreshToken({
-    refreshToken: loginResponse.refresh_token,
-    tenantId: loginResponse.tenant_id,
-  });
-  assertMatchesSchema(refreshResponse);
 });

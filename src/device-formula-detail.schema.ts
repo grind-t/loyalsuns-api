@@ -53,4 +53,5 @@ export const deviceFormulaDetailListResponseSchema = z
   })
   .strict();
 
+export type FormulaDetail = z.infer<typeof formulaDetailSchema>;
 export type DeviceFormulaDetailListResponse = z.infer<typeof deviceFormulaDetailListResponseSchema>;
