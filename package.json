@@ -25,9 +25,12 @@
     "fmt": "oxfmt",
     "lint": "oxlint --fix",
     "test:unit": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.unit.test.ts\"",
-    "test:e2e": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.e2e.test.ts\"",
-    "test": "node --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.test.ts\"",
+    "test:e2e": "node --env-file-if-exists=.env --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.e2e.test.ts\"",
+    "test": "node --env-file-if-exists=.env --experimental-transform-types --experimental-test-module-mocks --test \"src/**/*.test.ts\"",
     "build": "tsdown"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "latest",
@@ -35,6 +38,7 @@
     "oxlint": "latest",
     "oxlint-tsgolint": "latest",
     "tsdown": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "zod": "latest"
   }
 }
