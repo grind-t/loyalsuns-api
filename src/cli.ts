@@ -95,6 +95,7 @@ cli
   .option("--categories-id <categoriesId>", "Filter by categories id")
   .option("--current <current>", "Page number", "1")
   .option("--size <size>", "Page size", "10")
+  .option("--with-formula-details", "Include formula details for each commodity")
   .action(async (deviceId, options) => {
     const accessToken = await resolveAccessToken();
     const commodities = await listDeviceCommodities({
@@ -108,49 +109,16 @@ cli
       size: Number(options.size),
     }).then((v) => v.data.records);
 
-    const data = [];
-
-    for (const commodity of commodities) {
-      const materials = await listDeviceFormulaDetails({
-        accessToken,
-        templateCommodityId: commodity.id,
-      }).then((v) => v.data.records);
-
-      data.push({
-        code: commodity.commodityCode,
-        name: commodity.commodityName,
-        img: commodity.commodityImg,
-        category: commodity.categoriesName,
-        sort: commodity.sort,
-        price: commodity.commodityPrice,
-        discountPrice: commodity.discountPrice,
-        currency: commodity.currencySymbols,
-        recipe: {
-          coffeeDispenseOrder: commodity.coffeeOrder,
-          powderDispenseOrder: commodity.canisterOrder,
-          syrupDispenseOrder: commodity.pumpOrder,
-          coffeeVolume: commodity.coffeeVolume,
-          coffeeBeansAmount: commodity.beansVolume,
-          coffeePowderPressingForce: commodity.powderPressingForce,
-          coffeeExtractionPressure: commodity.extractionPressure,
-          coffeeExtractionFlowRate: commodity.extractionFlowRate,
-          coffeeWettingWaterVolume: commodity.wettingWaterVolume,
-          coffeeWettingWatterSpeed: commodity.wettingWaterSpeed,
-          coffeeWettingWaterTime: commodity.wettingWaterTime,
-          iceVolume: commodity.iceVolume,
-          materials: materials.map((material) => ({
-            channelType: material.channelType,
-            channelIndex: material.channelIndex,
-            name: material.ingredients,
-            dispenseTime: material.shipments,
-            waterDispenseTime: material.waterAmount,
-            waterDispenseType: material.waterType,
-          })),
-        },
-      });
+    if (options.withFormulaDetails) {
+      for (const commodity of commodities) {
+        (commodity as any).materials = await listDeviceFormulaDetails({
+          accessToken,
+          templateCommodityId: commodity.id,
+        }).then((v) => v.data.records);
+      }
     }
 
-    printJson(data);
+    printJson(commodities);
   });
 
 cli.version("1.0.0");
