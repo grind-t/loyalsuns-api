@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import process, { env } from "node:process";
 
-import { cac } from "cac";
+import { Command } from "commander";
 import Conf from "conf";
 
 import { login, refreshToken } from "./auth.ts";
@@ -45,17 +45,14 @@ async function resolveAccessToken(): Promise<string> {
   return response.access_token;
 }
 
-const cli = cac("loyalsuns");
+const cli = new Command("loyalsuns");
 
 cli
-  .command("login", "Log in and persist the session for other commands")
-  .option("--username <username>", "Account username", {
-    default: env.LOYALSUNS_USERNAME,
-  })
-  .option("--password <password>", "Account password", {
-    default: env.LOYALSUNS_PASSWORD,
-  })
-  .action(async (options: { username?: string; password?: string }) => {
+  .command("login")
+  .description("Log in and persist the session for other commands")
+  .option("--username <username>", "Account username", env.LOYALSUNS_USERNAME)
+  .option("--password <password>", "Account password", env.LOYALSUNS_PASSWORD)
+  .action(async (options) => {
     const { username, password } = options;
 
     if (!username || !password)
@@ -81,19 +78,23 @@ cli
     }
   });
 
-cli.command("logout", "Clear the persisted session").action(() => {
-  conf.clear();
-  console.log("Logged out.");
-});
+cli
+  .command("logout")
+  .description("Clear the persisted session")
+  .action(() => {
+    conf.clear();
+    console.log("Logged out.");
+  });
 
 cli
-  .command("commodities <deviceId>", "List a device's commodities")
+  .command("commodities <deviceId>")
+  .description("List a device's commodities")
   .option("--code <code>", "Filter by commodity code")
   .option("--name <name>", "Filter by commodity name")
   .option("--cold-or-hot <coldOrHot>", "Filter by 0 (cold) or 1 (hot)")
   .option("--categories-id <categoriesId>", "Filter by categories id")
-  .option("--current <current>", "Page number", { default: 1 })
-  .option("--size <size>", "Page size", { default: 10 })
+  .option("--current <current>", "Page number", "1")
+  .option("--size <size>", "Page size", "10")
   .action(async (deviceId, options) => {
     const accessToken = await resolveAccessToken();
     const commodities = await listDeviceCommodities({
@@ -152,11 +153,10 @@ cli
     printJson(data);
   });
 
-cli.help();
 cli.version("1.0.0");
 
 try {
-  cli.parse();
+  await cli.parseAsync();
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
 }
