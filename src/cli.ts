@@ -174,7 +174,7 @@ cli
         const channel = channelById.get(material.channelId);
         (material as any).channelCalibrationValue = channel?.channelCalibrationValue;
         (material as any).channelCalibrationValueTwo = channel?.channelCalibrationValueTwo;
-        (material as any).channelCalibrationValueUnit = channel?.channelCalibrationUnit;
+        (material as any).channelCalibrationValueUnit = channel?.channelCalibrationValueUnit;
         (material as any).channelJzz = channel?.jzz;
       }
 
