@@ -138,6 +138,52 @@ cli
     printJson(channels);
   });
 
+cli
+  .command("menu <deviceId>")
+  .description("Get a device's full menu (commodities with formula details and channels)")
+  .option("--code <code>", "Filter by commodity code")
+  .option("--name <name>", "Filter by commodity name")
+  .option("--cold-or-hot <coldOrHot>", "Filter by 0 (cold) or 1 (hot)")
+  .option("--categories-id <categoriesId>", "Filter by categories id")
+  .option("--size <size>", "Commodity page size", "100")
+  .action(async (deviceId, options) => {
+    const accessToken = await resolveAccessToken();
+    const channels = await listDeviceChannels({
+      accessToken,
+      deviceId,
+    }).then((v) => v.data.records);
+    const channelById = new Map(channels.map((channel) => [channel.id, channel]));
+    const commodities = await listDeviceCommodities({
+      accessToken,
+      deviceId,
+      commodityCode: options.code,
+      commodityName: options.name,
+      coldOrHot: options.coldOrHot,
+      categoriesId: options.categoriesId,
+      current: 1,
+      size: Number(options.size),
+    }).then((v) => v.data.records.filter((v) => !!v.status));
+
+    for (const commodity of commodities) {
+      const formulaDetails = await listDeviceFormulaDetails({
+        accessToken,
+        templateCommodityId: String(commodity.id),
+      }).then((v) => v.data.records);
+
+      for (const material of formulaDetails) {
+        const channel = channelById.get(material.channelId);
+        (material as any).channelCalibrationValue = channel?.channelCalibrationValue;
+        (material as any).channelCalibrationValueTwo = channel?.channelCalibrationValueTwo;
+        (material as any).channelCalibrationValueUnit = channel?.channelCalibrationUnit;
+        (material as any).channelJzz = channel?.jzz;
+      }
+
+      (commodity as any).formulaDetails = formulaDetails;
+    }
+
+    printJson(commodities);
+  });
+
 cli.version("1.0.0");
 
 try {
