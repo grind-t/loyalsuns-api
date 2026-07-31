@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import process, { env } from "node:process";
+import { env, exit } from "node:process";
 
 import { Command } from "commander";
 import Conf from "conf";
@@ -18,7 +18,7 @@ const conf = new Conf<{
 
 function fail(err: unknown): never {
   console.error(err instanceof Error ? err.message : String(err));
-  process.exit(1);
+  exit(1);
 }
 
 function printJson(value: unknown): void {
@@ -108,15 +108,6 @@ cli
       current: Number(options.current),
       size: Number(options.size),
     }).then((v) => v.data.records);
-
-    if (options.withFormulaDetails) {
-      for (const commodity of commodities) {
-        (commodity as any).materials = await listDeviceFormulaDetails({
-          accessToken,
-          templateCommodityId: commodity.id,
-        }).then((v) => v.data.records);
-      }
-    }
 
     printJson(commodities);
   });
