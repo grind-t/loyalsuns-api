@@ -96,7 +96,6 @@ cli
   .option("--categories-id <categoriesId>", "Filter by categories id")
   .option("--current <current>", "Page number", "1")
   .option("--size <size>", "Page size", "10")
-  .option("--with-formula-details", "Include formula details for each commodity")
   .action(async (deviceId, options) => {
     const accessToken = await resolveAccessToken();
     const commodities = await listDeviceCommodities({
@@ -123,19 +122,26 @@ cli
   });
 
 cli
+  .command("formula-details <commodityId>")
+  .description("List a commodity's formula details")
+  .action(async (templateCommodityId) => {
+    const accessToken = await resolveAccessToken();
+    const formulaDetails = await listDeviceFormulaDetails({
+      accessToken,
+      templateCommodityId,
+    }).then((v) => v.data.records);
+
+    printJson(formulaDetails);
+  });
+
+cli
   .command("channels <deviceId>")
   .description("List a device's channels")
-  .option("--current <current>", "Page number", "1")
-  .option("--size <size>", "Page size", "1000")
-  .option("--language <language>", "Response language", "en")
-  .action(async (deviceId, options) => {
+  .action(async (deviceId) => {
     const accessToken = await resolveAccessToken();
     const channels = await listDeviceChannels({
       accessToken,
       deviceId,
-      current: Number(options.current),
-      size: Number(options.size),
-      language: options.language,
     }).then((v) => v.data.records);
 
     printJson(channels);
