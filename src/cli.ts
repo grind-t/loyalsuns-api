@@ -5,6 +5,7 @@ import { Command } from "commander";
 import Conf from "conf";
 
 import { login, refreshToken } from "./auth.ts";
+import { listDeviceChannels } from "./device-channel.ts";
 import { listDeviceCommodities } from "./device-commodity.ts";
 import { listDeviceFormulaDetails } from "./device-formula-detail.ts";
 
@@ -119,6 +120,25 @@ cli
     }
 
     printJson(commodities);
+  });
+
+cli
+  .command("channels <deviceId>")
+  .description("List a device's channels")
+  .option("--current <current>", "Page number", "1")
+  .option("--size <size>", "Page size", "1000")
+  .option("--language <language>", "Response language", "en")
+  .action(async (deviceId, options) => {
+    const accessToken = await resolveAccessToken();
+    const channels = await listDeviceChannels({
+      accessToken,
+      deviceId,
+      current: Number(options.current),
+      size: Number(options.size),
+      language: options.language,
+    }).then((v) => v.data.records);
+
+    printJson(channels);
   });
 
 cli.version("1.0.0");

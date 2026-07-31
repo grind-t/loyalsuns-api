@@ -7,3 +7,5 @@ export type {
   FormulaDetail,
   DeviceFormulaDetailListResponse,
 } from "./device-formula-detail.schema.ts";
+export * from "./device-channel.ts";
+export type { Channel, DeviceChannelListResponse } from "./device-channel.schema.ts";
